@@ -49,7 +49,6 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
     constructor(view: EditorView) {
       this.decorations = Decoration.none;
       this.updateDebouncer(view);
-      // this.decorations = this.decorateView(view);
     }
 
     public update(update: ViewUpdate): void {
@@ -60,7 +59,6 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
     }
 
     private async updateDebouncer(view: EditorView) {
-      // Debounce mechanism here
       if (!this.delayedDecorateView) {
         this.delayedDecorateView = debounce(
           async (view: EditorView) => {
@@ -91,23 +89,16 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
 
       try {
         const nounsAndLocs = await getNounPhrases(processedContent.toLowerCase());
-        console.log(`nounsAndLocs: ${JSON.stringify(nounsAndLocs)}`);
         let remappedNounsAndLocs1 = this.remapNounPhrasePositions(nounsAndLocs, adjustedIndices, entireContent);
-        console.log(`remappedNounsAndLocs1: ${JSON.stringify(remappedNounsAndLocs1)}`);
         let remappedNounsAndLocs2 = await this.mergeDbNounsAndLocs(remappedNounsAndLocs1, currentFilePath);
         remappedNounsAndLocs2 = Object.fromEntries(
           Object.entries(remappedNounsAndLocs2).filter(([key, value]) => value.length > 0)
         );
-        console.log(`remappedNounsAndLocs2: ${JSON.stringify(remappedNounsAndLocs2)}`);
-        console.log("remappedNounsAndLocs2: ", remappedNounsAndLocs2);
         const nounPhrasesFromDb = await this.fetchNounPhrasePrevalence(remappedNounsAndLocs2, currentFilePath);
-        console.log(`nounPhrasesFromDb: ${JSON.stringify(nounPhrasesFromDb)}`);
 
         const sortedNounPhrases = Object.entries(nounPhrasesFromDb).sort((a, b) => b[1].total - a[1].total);
-        console.log(`sortedNounPhrases: ${JSON.stringify(sortedNounPhrases)}`);
 
         const deduplicatedNounPhrases = this.deduplicateNounPhrases(sortedNounPhrases, remappedNounsAndLocs2);
-        console.log(`deduplicatedNounPhrases: ${JSON.stringify(deduplicatedNounPhrases)}`);
 
         this.applyDecorations(view, deduplicatedNounPhrases);
       } catch (error) {

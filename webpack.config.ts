@@ -14,7 +14,7 @@ const config: Configuration = {
     libraryTarget: 'commonjs',
     clean: true,
   },
-  target: 'node',
+  target: 'web',
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? 'source-map' : 'inline-source-map',
   module: {
@@ -66,6 +66,9 @@ const config: Configuration = {
     },
     extensions: ['.ts', '.tsx', '.js'],
     mainFields: ['browser', 'module', 'main'],
+    fallback: {
+      "fs": false
+    }
   },
   externals: {
     obsidian: 'commonjs2 obsidian',

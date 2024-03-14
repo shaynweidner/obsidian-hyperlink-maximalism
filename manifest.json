@@ -1,9 +1,9 @@
 {
   "id": "obsidian-hyperlink-maximalism",
   "name": "Hyperlink Maximalism",
-  "description": "Graded highlighting of N-grams in Obsidian",
+  "description": "Graded highlighting of common noun phrases in obsidian.",
   "version": "0.0.1",
   "minAppVersion": "0.13.8",
   "author": "Shayn Weidner",
-  "isDesktopOnly": true
+  "isDesktopOnly": false
 }

@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-ner-highlighter",
+  "name": "obsidian-hyperlink-maximalism",
   "version": "0.0.1",
   "description": "A plugin to highlight named entities in the current note",
   "main": "src/index.ts",
@@ -28,8 +28,6 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "compromise": "^14.12.0",
-    "compromise-stats": "^0.1.0",
     "lodash": "^4.17.21",
     "lokijs": "^1.5.12",
     "stopwords-iso": "^1.1.0",

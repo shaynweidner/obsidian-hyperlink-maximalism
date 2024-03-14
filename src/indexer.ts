@@ -30,52 +30,46 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
     );
   }
 
-  // async loadDatabase() {
-  //   const filePath = "./.noun-phrases/testing.json";
-  //   try {
-  //     // Check if the database file exists
-  //     const fileExists =
-  //       await this.pluginHelper.plugin.app.vault.adapter.exists(filePath);
-  //     if (fileExists) {
-  //       // Read the database content from the file
-  //       const dbContent = await this.pluginHelper.plugin.app.vault.adapter.read(
-  //         filePath
-  //       );
-  //       // Initialize your database with the content
-  //       this.db.loadJSON(dbContent);
-  //       this.nounPhrases = this.db.getCollection("nounPhrases")
-  //       console.log("Database loaded successfully");
-  //       this.emit("indexLoaded");
-  //     } else {
-  //       console.log("Database file does not exist, creating a new one.");
-  //       await this.buildIndex();
-  //       // Here you can handle initializing a new database if needed
-  //     }
-  //   } catch (error) {
-  //     console.error("Error loading database:", error);
-  //   }
-  // }
+  async loadDatabase() {
+    const filePath = "./.noun-phrases/testing.json";
+    try {
+      // Check if the database file exists
+      const fileExists =
+        await this.pluginHelper.plugin.app.vault.adapter.exists(filePath);
+      if (fileExists) {
+        // Read the database content from the file
+        const dbContent = await this.pluginHelper.plugin.app.vault.adapter.read(
+          filePath
+        );
+        // Initialize your database with the content
+        this.db.loadJSON(dbContent);
+        this.nounPhrases = this.db.getCollection("nounPhrases")
+        console.log("Database loaded successfully");
+        this.emit("indexLoaded");
+      } else {
+        console.log("Database file does not exist, creating a new one.");
+        await this.buildIndex();
+        // Here you can handle initializing a new database if needed
+      }
+    } catch (error) {
+      console.error("Error loading database:", error);
+    }
+  }
 
-  // async saveDatabase() {
-  //   try {
-  //     // Serialize the database to a string
-  //     const dbString = this.db.serialize();
-  //     // Save the string to a file in the vault
-  //     await this.pluginHelper.plugin.app.vault.adapter.write(
-  //       "./.noun-phrases/testing.json",
-  //       dbString
-  //     );
-  //     console.log("Database saved successfully");
-  //   } catch (error) {
-  //     console.error("Failed to save the database:", error);
-  //   }
-  // }
-
-  // public async buildIndex(): Promise<void> {
-  //   await this.getDistinctNounPhrases()
-  //   // console.log("distinctNounPhrases: ", distinctNounPhrases);
-  //   // await this.updateNounPhraseCounts(distinctNounPhrases);
-  // }
+  async saveDatabase() {
+    try {
+      // Serialize the database to a string
+      const dbString = this.db.serialize();
+      // Save the string to a file in the vault
+      await this.pluginHelper.plugin.app.vault.adapter.write(
+        "./.noun-phrases/testing.json",
+        dbString
+      );
+      console.log("Database saved successfully");
+    } catch (error) {
+      console.error("Failed to save the database:", error);
+    }
+  }
 
   public async getCurrentNoteNounPhrases(content : string): Promise<Set<unknown>> {
     const { content: processedContent, adjustedIndices } = preProcessContent(content);
@@ -119,18 +113,12 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
             console.error("Error fetching noun phrases:", error);
         }
     }
-    console.log("temporaryData: ", temporaryData);
 
     distinctNounPhrases.forEach(nounPhrase => {
       Object.entries(temporaryData).forEach(([path, { originalContent, processedContent, adjustedIndices }]) => {
       
           // Use findNounPhrasePositionsInContent to find occurrences of the noun phrase in this document's content
           const positions = this.findNounPhrasePositionsInContent(nounPhrase.toLowerCase(), processedContent.toLowerCase(), adjustedIndices);
-          // if (positions.length > 0){
-          //   console.log(nounPhrase);
-          //   console.log(path);
-          //   console.log(positions);
-          // }
 
           // Update or insert the noun phrase document in the collection
           let doc = this.nounPhrases.findOne({ nounPhrase }) || this.nounPhrases.insert({ nounPhrase, files: {} });
@@ -148,22 +136,6 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
           this.nounPhrases.update(doc);
       });
     });
-
-    // // Find positions for each distinct noun phrase in each document's content
-    // let nounPhrasesConsolidated = {};
-    // distinctNounPhrases.forEach(phrase => {
-    //     Object.entries(temporaryData).forEach(([path, { originalContent, processedContent, adjustedIndices }]) => {
-    //         const positions = this.findNounPhrasePositionsInContent(phrase.toLowerCase(), processedContent.toLowerCase(), adjustedIndices);
-    //         if (positions.length > 0) {
-    //             if (!nounPhrasesConsolidated[phrase]) {
-    //                 nounPhrasesConsolidated[phrase] = {};
-    //             }
-    //             nounPhrasesConsolidated[phrase][path] = positions;
-    //         }
-    //     });
-    // });
-
-    // return nounPhrasesConsolidated;
     console.log("Index rebuilt");
     this.emit("indexRebuilt");
   }
