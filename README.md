@@ -17,8 +17,18 @@ Also, in Linus's demo and post he mentions clicking or hovering over the highlig
 
 There may be better ideas for when to build the vault-wide index for the phrases to highlight.  See Usage below.
 
+## Installation
+You'll have to install this with BRAT.
+
 ## Usage
-Currently this plugin needs an external tool to generate the phrases.  It will send a JSON payload to an API with the format `{"text": "note text here"}`, and expects a response like `{"phrases": ["here's a phrase", "here's another"]}`.  The specific API path can be specified in the plugin's settings.  I have created a [simple spaCy API repo](https://github.com/shaynweidner/simple_spacy_api) if you would like to get right to using the plugin.  In the releases there, there is an executable that should run on Windows, otherwise you'll have to clone it down and run the API yourself.
+Currently this plugin needs an external tool to generate the phrases.  It will send a JSON payload to an API with the format `{"text": "note text here"}`, and expects a response like `{"phrases": ["here's a phrase", "here's another"]}`.  The specific API path can be specified in the plugin's settings.  I have created a [simple spaCy API repo](https://github.com/shaynweidner/simple_spacy_api) if you would like to get right to using the plugin.  In the releases there, there is an executable that should run on Windows, otherwise you'll have to clone it down and run the API yourself.  The highlighting of the phrases is based on the prevalence of the phrase in the vault.  Since it was initially developed just for my own use, it is currently only considering notes in a folder `4. Notes` within the vault's root.  I intended to add some "exclude" and/or "include" options, but in the meantime to fix it to work with your vault, you can either install the plugin and then find the "4. Notes" string and replace it accordingly, or you can clone this down, edit the code, and build the plugin yourself.
+
+## Building the plugin
+```
+git clone https://github.com/shaynweidner/obsidian-hyperlink-maximalism
+npm install --force #there are conflicts in the packages, but if you force it it will work
+npm run build
+```
 
 ### Preview
 
