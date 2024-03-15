@@ -6,13 +6,19 @@ const ignoreStrings = new Set(ignoreStringsList);
 
 
 export async function getNounPhrases(
-  text: string
+  text: string,
+  protocol: string,
+  host: string,
+  port: string,
+  slug: string
 ): Promise<{ [key: string]: number[][] }> {
   const data = JSON.stringify({ text });
+  const apiURL = `${protocol}://${host}:${port}/${slug}`
+
 
   try {
     const response = await fetch(
-      "http://192.168.50.245:5000/extract_noun_phrases",
+      apiURL,
       {
         method: "POST",
         headers: {
@@ -25,7 +31,7 @@ export async function getNounPhrases(
       throw new Error("Network response was not ok");
     }
     const responseJson = await response.json();
-    let nounPhrases = responseJson.noun_phrases;
+    let nounPhrases = responseJson.phrases;
 
     // Filter out common words from the noun phrases
     nounPhrases = nounPhrases.filter(

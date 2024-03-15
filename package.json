@@ -1,11 +1,11 @@
 {
   "name": "obsidian-hyperlink-maximalism",
   "version": "0.0.1",
-  "description": "A plugin to highlight named entities in the current note",
+  "description": "Graded highlighting of common phrases in obsidian.",
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
-    "build": "webpack && cp ./dist/* c:/Users/shayn/Documents/Obsidian/zettelkasten/.obsidian/plugins/obsidian-hyperlink-maximalism"
+    "build": "webpack"
   },
   "devDependencies": {
     "@codemirror/rangeset": "^0.19.7",

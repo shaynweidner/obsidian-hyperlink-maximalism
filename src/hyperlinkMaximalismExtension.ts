@@ -71,7 +71,7 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
               }
             });
           },
-          1000,
+          2000,
           true
         );
       }
@@ -88,7 +88,7 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
       const currentFilePath = indexer.pluginHelper.activeFile?.path || "";
 
       try {
-        const nounsAndLocs = await getNounPhrases(processedContent.toLowerCase());
+        const nounsAndLocs = await getNounPhrases(processedContent.toLowerCase(), indexer.settings.spaCyProtocol, indexer.settings.spaCyIP, indexer.settings.spaCyPort, indexer.settings.spaCySlug);
         let remappedNounsAndLocs1 = this.remapNounPhrasePositions(nounsAndLocs, adjustedIndices, entireContent);
         let remappedNounsAndLocs2 = await this.mergeDbNounsAndLocs(remappedNounsAndLocs1, currentFilePath);
         remappedNounsAndLocs2 = Object.fromEntries(
