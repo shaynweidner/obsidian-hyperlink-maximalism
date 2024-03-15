@@ -1,4 +1,4 @@
-# NER Highlighter
+# Hyperlink Maximalism Obisidian Plugin
 
 Based on a [post](https://thesephist.com/posts/hyperlink/) and a [demo](https://notation.app/) from [Linus Lee](https://thesephist.com/) called Hyperlink Maximalism.  
 
