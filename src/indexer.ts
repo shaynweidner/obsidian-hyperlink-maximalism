@@ -32,7 +32,8 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
   }
 
   async loadDatabase() {
-    const filePath = "./.noun-phrases/testing.json";
+    await this.pluginHelper.plugin.app.vault.adapter.mkdir(".noun-phrases");
+    const filePath = "./.noun-phrases/" + this.settings.dbFileName;
     try {
       // Check if the database file exists
       const fileExists =
@@ -58,12 +59,14 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
   }
 
   async saveDatabase() {
+    await this.pluginHelper.plugin.app.vault.adapter.mkdir(".noun-phrases");
+    const filePath = "./.noun-phrases/" + this.settings.dbFileName;
     try {
       // Serialize the database to a string
       const dbString = this.db.serialize();
       // Save the string to a file in the vault
       await this.pluginHelper.plugin.app.vault.adapter.write(
-        "./.noun-phrases/testing.json",
+        filePath,
         dbString
       );
       console.log("Database saved successfully");
