@@ -102,7 +102,8 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
 
     // Process each document
     for (const file of files) {
-        if (!file.path.includes("4. Notes")) continue;
+        const isExcluded = this.settings.folder_exclusions.some(folder => file.path.includes(folder));
+        if (isExcluded) continue;
         const content = await this.pluginHelper.plugin.app.vault.read(file);
         const { content: processedContent, adjustedIndices } = preProcessContent(content);
 

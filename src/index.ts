@@ -11,6 +11,7 @@ interface TagsHyperlinkMaximalismPluginSettings {
   spaCyIP: string;
   spaCyPort: string;
   spaCySlug: string;
+  folder_exclusions: string[];
 }
 
 const DEFAULT_SETTINGS: TagsHyperlinkMaximalismPluginSettings = {
@@ -19,7 +20,8 @@ const DEFAULT_SETTINGS: TagsHyperlinkMaximalismPluginSettings = {
   spaCyProtocol: 'http',
   spaCyIP: "127.0.0.1",
   spaCyPort: "23692",
-  spaCySlug: "extract_phrases"
+  spaCySlug: "extract_phrases",
+  folder_exclusions: [],
 }
 
 class TagsHyperlinkMaximalismPluginSettingTab extends PluginSettingTab {
@@ -101,6 +103,18 @@ class TagsHyperlinkMaximalismPluginSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.spaCySlug)
         .onChange(async (value) => {
           this.plugin.settings.spaCySlug = value;
+          await this.plugin.saveSettings();
+        }));
+    
+    new Setting(containerEl)
+      .setName('Exclusion Folder(s)')
+      .setDesc(`A comma-separated list of folders to exclude from indexing.`)
+      .addText(text => text
+        .setPlaceholder('extract_noun_phrases')
+        .setValue(this.plugin.settings.folder_exclusions.join(', '))
+        .onChange(async (value) => {
+          const splits = value.split(', ').map((s) => s.trim());
+          this.plugin.settings.folder_exclusions = splits;
           await this.plugin.saveSettings();
         }));
 	}
