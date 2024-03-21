@@ -4,10 +4,13 @@ import { debounce, type Debouncer } from 'obsidian';
 import { Indexer } from './indexer';
 import { PluginHelper, preProcessContent } from './plugin-helper';
 import { getNounPhrases } from './callSpacy';
+import { showSuggestionsModal } from './popup/suggestionsPopup';
 
-const underlineDecoration = (start, end, indexKeyword, entityClass, color, opacity) => {
+const hmHighlightClass = 'cm-ngram-highlight'
+
+const underlineDecoration = (start, end, indexKeyword, color, opacity) => {
   return Decoration.mark({
-    class: entityClass,
+    class: hmHighlightClass,
     attributes: {
       'data-index-keyword': indexKeyword,
       'data-position-start': `${start}`,
@@ -179,7 +182,7 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
       });
   
       allPositions.forEach(({ start, end, phrase, color, opacity }) => {
-          builder.add(start, end, underlineDecoration(start, end, phrase, 'cm-ngram-highlight', color, opacity));
+          builder.add(start, end, underlineDecoration(start, end, phrase, color, opacity));
       });
   
       this.decorations = builder.finish();
@@ -238,5 +241,54 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
 
   }, {
     decorations: view => view.decorations,
+
+    eventHandlers: {
+      mousedown: (e: MouseEvent, view: EditorView) => {
+        const target = e.target as HTMLElement;
+        const isCandidate = target.classList.contains(hmHighlightClass);
+
+        // Do nothing if user right-clicked or unrelated DOM element was clicked
+        if (!isCandidate || e.button !== 0) {
+          return;
+        }
+
+        // Extract position and replacement text from target element data attributes state
+        const { positionStart, positionEnd, indexKeyword } = target.dataset;
+
+        const currentFilePath = indexer.pluginHelper.activeFile?.path || "";
+        const matches = indexer.nounPhrases.findOne({"nounPhrase": indexKeyword}).files;
+        const suggestionsWithCounts = {};
+
+        for (const filename in matches) {
+            if (matches.hasOwnProperty(filename) && filename !== currentFilePath) {
+                suggestionsWithCounts[filename] = matches[filename].length;
+            }
+        }
+
+        const suggestionsWithCountsStrings = Object.keys(suggestionsWithCounts)
+            .sort((a, b) => suggestionsWithCounts[b] - suggestionsWithCounts[a])
+            .map(filename => `${filename}: ${suggestionsWithCounts[filename]}`);
+
+        // Show suggestions modal
+        showSuggestionsModal({
+          app: indexer.pluginHelper.plugin.app,
+          mouseEvent: e,
+          suggestions: suggestionsWithCountsStrings,
+          currentPhrase: indexKeyword,
+          onClick1: (replaceText) => {
+            view.dispatch({
+              changes: {
+                from: +positionStart,
+                to: +positionEnd,
+                insert: replaceText,
+              },
+            });
+          },
+          onClick2: (linkText) => {
+            indexer.pluginHelper.plugin.app.workspace.openLinkText(linkText.replace(/: [^:]*$/, ''), '/', false)
+          }
+        });
+      }
+    }
   });
 };
