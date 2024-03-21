@@ -12,6 +12,8 @@ interface TagsHyperlinkMaximalismPluginSettings {
   spaCyPort: string;
   spaCySlug: string;
   folder_exclusions: string[];
+  minimumIndexLength: number;
+  maximumColorScale: number;
 }
 
 const DEFAULT_SETTINGS: TagsHyperlinkMaximalismPluginSettings = {
@@ -22,6 +24,8 @@ const DEFAULT_SETTINGS: TagsHyperlinkMaximalismPluginSettings = {
   spaCyPort: "23692",
   spaCySlug: "extract_phrases",
   folder_exclusions: [],
+  minimumIndexLength: 3,
+  maximumColorScale: 10,
 }
 
 class TagsHyperlinkMaximalismPluginSettingTab extends PluginSettingTab {
@@ -110,13 +114,35 @@ class TagsHyperlinkMaximalismPluginSettingTab extends PluginSettingTab {
       .setName('Exclusion Folder(s)')
       .setDesc(`A comma-separated list of folders to exclude from indexing.`)
       .addText(text => text
-        .setPlaceholder('extract_noun_phrases')
+        .setPlaceholder('1. Inbox')
         .setValue(this.plugin.settings.folder_exclusions.join(', '))
         .onChange(async (value) => {
           const splits = value.split(', ').map((s) => s.trim());
           this.plugin.settings.folder_exclusions = splits;
           await this.plugin.saveSettings();
         }));
+    
+    new Setting(containerEl)
+    .setName('Minimum String Length to Index')
+    .setDesc(`Any "phrases" with fewer characters then this won't be indexed or highlighted`)
+    .addText(text => text
+      .setPlaceholder('3')
+      .setValue(this.plugin.settings.minimumIndexLength)
+      .onChange(async (value) => {
+        this.plugin.settings.minimumIndexLength = value;
+        await this.plugin.saveSettings();
+      }));
+    
+    new Setting(containerEl)
+    .setName('Maximum for Color Scale')
+    .setDesc(`The amount of instances of a string such that this quantity or more will be highlighted red.`)
+    .addText(text => text
+      .setPlaceholder('10')
+      .setValue(this.plugin.settings.maximumColorScale)
+      .onChange(async (value) => {
+        this.plugin.settings.maximumColorScale = value;
+        await this.plugin.saveSettings();
+      }));
 	}
 }
 

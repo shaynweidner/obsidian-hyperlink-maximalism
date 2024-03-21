@@ -46,11 +46,12 @@ export const preProcessContent = (content: string) => {
   content = content.replace(/!\[.*?\]\(data:image\/[a-zA-Z]+;base64,[^\)]+\)/g, replaceWithSpecialChar);
   content = content.replace(/(\$\$?)[^\$]+?\1/g, replaceWithSpecialChar);
   content = content.replace(/`/g, specialChar);
-  content = content.replace(/^#[^\s].*$/gm, replaceWithSpecialChar);
+  content = content.replace(/#[^\s]+/g, replaceWithSpecialChar);
   content = content.replace(/^#+\s+/gm, replaceWithSpecialChar);
   content = content.replace(/\[\^\d+\](?=\s|\]|$)/g, replaceWithSpecialChar);
   content = content.replace(/^\[\^\d+\]:\s*\[\[.*\]\]\s*$/gm, replaceWithSpecialChar);
   content = content.replace(/\b\d{5,}(_\d+)*\b/g, replaceWithSpecialChar);
+  content = content.replace(/\b\d{1,2}\b/g, replaceWithSpecialChar);
 
   content = replaceObsidianLinks(content, specialChar);
 
@@ -78,4 +79,7 @@ export const postProcessContent = (content: string) => {
 
 export const ignoreStringsList = [
   ".",
+  "-",
+  "'s",
+  "_"
 ]

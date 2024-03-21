@@ -6,7 +6,7 @@ import { PluginHelper, preProcessContent } from './plugin-helper';
 import { getNounPhrases } from './callSpacy';
 import { showSuggestionsModal } from './popup/suggestionsPopup';
 
-const hmHighlightClass = 'cm-ngram-highlight'
+const hmHighlightClass = 'hm-ngram-highlight'
 
 const underlineDecoration = (start, end, indexKeyword, color, opacity) => {
   return Decoration.mark({
@@ -20,8 +20,7 @@ const underlineDecoration = (start, end, indexKeyword, color, opacity) => {
   });
 };
 
-const calculateHighlighting = (count, isDarkTheme) => {
-  const max_count = 10;
+const calculateHighlighting = (count, max_count) => {
   count = Math.min(count, max_count);
   const grossUpFactor = 1 / (-Math.log(1 / (max_count + 1)));
   const stepOne = Math.log((1 + count) / (max_count + 1)) + 1;
@@ -30,8 +29,8 @@ const calculateHighlighting = (count, isDarkTheme) => {
   const scaleFactor = 1 - stepThree;
   const opacity = 1;
 
-  let startRGB = isDarkTheme ? { r: 0, g: 0, b: 255 } : { r: 255, g: 255, b: 237 };
-  let endRGB = isDarkTheme ? { r: 255, g: 0, b: 0 } : { r: 204, g: 85, b: 0 };
+  let startRGB = { r: 0, g: 0, b: 255 };
+  let endRGB = { r: 255, g: 0, b: 0 };
 
   const r = Math.round(startRGB.r + (endRGB.r - startRGB.r) * scaleFactor);
   const g = Math.round(startRGB.g + (endRGB.g - startRGB.g) * scaleFactor);
@@ -103,7 +102,7 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
 
         const deduplicatedNounPhrases = this.deduplicateNounPhrases(sortedNounPhrases, remappedNounsAndLocs2);
 
-        this.applyDecorations(view, deduplicatedNounPhrases);
+        this.applyDecorations(view, deduplicatedNounPhrases, indexer.settings.maximumColorScale);
       } catch (error) {
         console.error("Error decorating text:", error);
       }
@@ -161,9 +160,8 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
       return finalNounPhrases;
     }
 
-    private applyDecorations(view: EditorView, deduplicatedNounPhrases) {
+    private applyDecorations(view: EditorView, deduplicatedNounPhrases, max_count) {
       const builder = new RangeSetBuilder<Decoration>();
-      const isDarkTheme = true;
   
       // Flatten all positions from deduplicatedNounPhrases into a single array and sort
       let allPositions = deduplicatedNounPhrases.flatMap(({ phrase, positions, total }) => {
@@ -172,7 +170,7 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
           start,
           end,
           phrase,
-          ...calculateHighlighting(total, isDarkTheme)
+          ...calculateHighlighting(total, max_count)
         })
       })
       })
