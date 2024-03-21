@@ -82,7 +82,11 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
 
     try {
         const nounsAndLocs = await getNounPhrases(processedContent.toLowerCase(), this.settings.spaCyProtocol, this.settings.spaCyIP, this.settings.spaCyPort, this.settings.spaCySlug);
-        Object.keys(nounsAndLocs).forEach(phrase => distinctNounPhrases.add(phrase));
+        Object.keys(nounsAndLocs).forEach(phrase => {
+          if (phrase.length >= this.settings.minimumIndexLength) { // Check phrase length
+              distinctNounPhrases.add(phrase.toLowerCase());
+          }
+        });
         temporaryData = { originalContent: content, processedContent, adjustedIndices };
     } catch (error) {
         console.error("Error fetching noun phrases:", error);
@@ -120,6 +124,7 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
     }
 
     distinctNounPhrases.forEach(nounPhrase => {
+      if (nounPhrase.length < this.settings.minimumIndexLength) return;
       Object.entries(temporaryData).forEach(([path, { originalContent, processedContent, adjustedIndices }]) => {
       
           // Use findNounPhrasePositionsInContent to find occurrences of the noun phrase in this document's content
@@ -145,6 +150,7 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
       });
     });
     console.log("Index rebuilt");
+    this.saveDatabase();
     this.emit("indexRebuilt");
   }
 
@@ -175,25 +181,4 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
     }
     return positions;
   }
-
-
-  // private updateNounPhraseCounts(nounPhrasesConsolidated) {
-  //   Object.entries(nounPhrasesConsolidated).forEach(([nounPhrase, filePositions]) => {
-  //     let doc = this.nounPhrases.findOne({ nounPhrase }) || this.nounPhrases.insert({ nounPhrase, files: {} });
-
-  //     Object.entries(filePositions).forEach(([path, positions]) => {
-  //       // If the path exists, check for duplicate positions before concatenating
-  //       if (!doc.files[path]) {
-  //         doc.files[path] = positions;
-  //       } else {
-  //         // Assuming you need a mechanism to avoid duplicate position arrays
-  //         const existingPositions = doc.files[path];
-  //         const updatedPositions = positions.filter(pos => !existingPositions.some(ep => ep[0] === pos[0] && ep[1] === pos[1]));
-  //         doc.files[path] = existingPositions.concat(updatedPositions);
-  //       }
-  //     });
-
-  //     this.nounPhrases.update(doc);
-  //   });
-  // }
 }
