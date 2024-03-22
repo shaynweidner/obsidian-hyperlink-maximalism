@@ -14,6 +14,7 @@ interface TagsHyperlinkMaximalismPluginSettings {
   folder_exclusions: string[];
   minimumIndexLength: number;
   maximumColorScale: number;
+  linkInNewTab: boolean;
 }
 
 const DEFAULT_SETTINGS: TagsHyperlinkMaximalismPluginSettings = {
@@ -26,6 +27,7 @@ const DEFAULT_SETTINGS: TagsHyperlinkMaximalismPluginSettings = {
   folder_exclusions: [],
   minimumIndexLength: 3,
   maximumColorScale: 10,
+  linkInNewTab: true
 }
 
 class TagsHyperlinkMaximalismPluginSettingTab extends PluginSettingTab {
@@ -79,7 +81,7 @@ class TagsHyperlinkMaximalismPluginSettingTab extends PluginSettingTab {
     
     new Setting(containerEl)
       .setName('spaCy API host IP')
-      .setDesc(`The IP address of the API that is hosting the NLP endpoint.`)
+      .setDesc(`The IP address / domain name of the API that is hosting the NLP endpoint.`)
       .addText(text => text
         .setPlaceholder('127.0.0.1')
         .setValue(this.plugin.settings.spaCyIP)
@@ -141,6 +143,16 @@ class TagsHyperlinkMaximalismPluginSettingTab extends PluginSettingTab {
       .setValue(this.plugin.settings.maximumColorScale)
       .onChange(async (value) => {
         this.plugin.settings.maximumColorScale = value;
+        await this.plugin.saveSettings();
+      }));
+    
+    new Setting(containerEl)
+    .setName('Go-to in new tab')
+    .setDesc(`Should following a phrase to another note open the other note in a new tab?`)
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.linkInNewTab)
+      .onChange(async (value) => {
+        this.plugin.settings.linkInNewTab = value;
         await this.plugin.saveSettings();
       }));
 	}

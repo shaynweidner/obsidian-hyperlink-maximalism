@@ -283,7 +283,7 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
             });
           },
           onClick2: (linkText) => {
-            indexer.pluginHelper.plugin.app.workspace.openLinkText(linkText.replace(/: [^:]*$/, ''), '/', false)
+            indexer.pluginHelper.plugin.app.workspace.openLinkText(linkText.replace(/: [^:]*$/, ''), '/', indexer.settings.linkInNewTab)
           }
         });
       }
