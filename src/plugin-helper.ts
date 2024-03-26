@@ -40,6 +40,10 @@ export const preProcessContent = (content: string) => {
   const specialChar = 'đ';
   const replaceWithSpecialChar = (match: string) => specialChar.repeat(match.length);
 
+  // Adding replacement for text enclosed by underscores
+  content = content.replace(/_([^_]+)_/g, `${specialChar}$1${specialChar}`);
+
+
   content = content.replace(/^---[\s\S]+?---/gm, replaceWithSpecialChar);
   content = content.replace(/%%[\s\S]+?%%/gm, replaceWithSpecialChar);
   content = content.replace(/^```[\s\S]+?```/gm, replaceWithSpecialChar);

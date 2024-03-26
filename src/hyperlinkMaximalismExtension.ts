@@ -22,11 +22,9 @@ const underlineDecoration = (start, end, indexKeyword, color, opacity) => {
 
 const calculateHighlighting = (count, max_count) => {
   count = Math.min(count, max_count);
-  const grossUpFactor = 1 / (-Math.log(1 / (max_count + 1)));
-  const stepOne = Math.log((1 + count) / (max_count + 1)) + 1;
-  const stepTwo = 1 - stepOne;
-  const stepThree = grossUpFactor * stepTwo;
-  const scaleFactor = 1 - stepThree;
+  const grossUpFactor = 1 / Math.log((Number(max_count) + 1));
+  const stepOne = Math.log(1 + count);
+  const scaleFactor = stepOne * grossUpFactor;
   const opacity = 1;
 
   let startRGB = { r: 0, g: 0, b: 255 };

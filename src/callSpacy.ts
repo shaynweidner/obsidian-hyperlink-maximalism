@@ -48,7 +48,7 @@ export async function getNounPhrases(
       phrase = postProcessContent(phrase);
       // Escape special characters for regex
       const escapedPhrase = phrase.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-      const regex = new RegExp(`\\b${escapedPhrase}\\b`, "gi");
+      const regex = new RegExp(`\\b${escapedPhrase}s?\\b`, "gi");
       let match;
 
       while ((match = regex.exec(text)) !== null) {

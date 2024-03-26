@@ -95,62 +95,65 @@ export class Indexer extends TypedEmitter<IndexerEvents> {
     return distinctNounPhrases;
   }
 
-  public async buildIndex(): Promise<void> {
-    this.db.removeCollection("nounPhrases")
-    this.nounPhrases = this.db.addCollection<NounPhraseDocument>(
-      "nounPhrases",
-      {
-        indices: ["phrase"],
-      }
-    );
-    const files = this.pluginHelper.plugin.app.vault.getMarkdownFiles();
-    let temporaryData = {};
-    let distinctNounPhrases = new Set();
-
-    // Process each document
-    for (const file of files) {
-        const isExcluded = this.settings.folder_exclusions.some(folder => file.path.includes(folder));
-        if (isExcluded) continue;
-        const content = await this.pluginHelper.plugin.app.vault.read(file);
-        const { content: processedContent, adjustedIndices } = preProcessContent(content);
-
-        try {
-            const nounsAndLocs = await getNounPhrases(processedContent.toLowerCase(), this.settings.spaCyProtocol, this.settings.spaCyIP, this.settings.spaCyPort, this.settings.spaCySlug);
-            Object.keys(nounsAndLocs).forEach(phrase => distinctNounPhrases.add(phrase.toLowerCase()));
-            temporaryData[file.path] = { originalContent: content, processedContent, adjustedIndices };
-        } catch (error) {
-            console.error("Error fetching noun phrases:", error);
+  public async buildIndex(justDecorate: boolean=false): Promise<void> {
+    if (!justDecorate){
+        
+      this.db.removeCollection("nounPhrases")
+      this.nounPhrases = this.db.addCollection<NounPhraseDocument>(
+        "nounPhrases",
+        {
+          indices: ["phrase"],
         }
-    }
+      );
+      const files = this.pluginHelper.plugin.app.vault.getMarkdownFiles();
+      let temporaryData = {};
+      let distinctNounPhrases = new Set();
 
-    distinctNounPhrases.forEach(nounPhrase => {
-      if (nounPhrase.length < this.settings.minimumIndexLength) return;
-      Object.entries(temporaryData).forEach(([path, { originalContent, processedContent, adjustedIndices }]) => {
-      
-          // Use findNounPhrasePositionsInContent to find occurrences of the noun phrase in this document's content
-          const positions = this.findNounPhrasePositionsInContent(nounPhrase.toLowerCase(), processedContent.toLowerCase(), adjustedIndices);
-          if(positions.length > 0){
+      // Process each document
+      for (const file of files) {
+          const isExcluded = this.settings.folder_exclusions.some(folder => file.path.includes(folder));
+          if (isExcluded) continue;
+          const content = await this.pluginHelper.plugin.app.vault.read(file);
+          const { content: processedContent, adjustedIndices } = preProcessContent(content);
 
-            // Update or insert the noun phrase document in the collection
-            let doc = this.nounPhrases.findOne({ nounPhrase }) || this.nounPhrases.insert({ nounPhrase, files: {} });
-  
-            // Append positions to the existing positions for this file, ensuring no duplicates
-            if (!doc.files[path]) {
-                doc.files[path] = positions;
-            } else {
-                const existingPositions = doc.files[path];
-                const updatedPositions = positions.filter(pos => !existingPositions.some(ep => ep[0] === pos[0] && ep[1] === pos[1]));
-                doc.files[path] = existingPositions.concat(updatedPositions);
-            }
-  
-            // Finally, update the document in the collection
-            this.nounPhrases.update(doc);
-
+          try {
+              const nounsAndLocs = await getNounPhrases(processedContent.toLowerCase(), this.settings.spaCyProtocol, this.settings.spaCyIP, this.settings.spaCyPort, this.settings.spaCySlug);
+              Object.keys(nounsAndLocs).forEach(phrase => distinctNounPhrases.add(phrase.toLowerCase()));
+              temporaryData[file.path] = { originalContent: content, processedContent, adjustedIndices };
+          } catch (error) {
+              console.error("Error fetching noun phrases:", error);
           }
+      }
+
+      distinctNounPhrases.forEach(nounPhrase => {
+        if (nounPhrase.length < this.settings.minimumIndexLength) return;
+        Object.entries(temporaryData).forEach(([path, { originalContent, processedContent, adjustedIndices }]) => {
+        
+            // Use findNounPhrasePositionsInContent to find occurrences of the noun phrase in this document's content
+            const positions = this.findNounPhrasePositionsInContent(nounPhrase.toLowerCase(), processedContent.toLowerCase(), adjustedIndices);
+            if(positions.length > 0){
+
+              // Update or insert the noun phrase document in the collection
+              let doc = this.nounPhrases.findOne({ nounPhrase }) || this.nounPhrases.insert({ nounPhrase, files: {} });
+    
+              // Append positions to the existing positions for this file, ensuring no duplicates
+              if (!doc.files[path]) {
+                  doc.files[path] = positions;
+              } else {
+                  const existingPositions = doc.files[path];
+                  const updatedPositions = positions.filter(pos => !existingPositions.some(ep => ep[0] === pos[0] && ep[1] === pos[1]));
+                  doc.files[path] = existingPositions.concat(updatedPositions);
+              }
+    
+              // Finally, update the document in the collection
+              this.nounPhrases.update(doc);
+
+            }
+        });
       });
-    });
-    console.log("Index rebuilt");
-    this.saveDatabase();
+      console.log("Index rebuilt");
+      this.saveDatabase();
+    }
     this.emit("indexRebuilt");
   }
 

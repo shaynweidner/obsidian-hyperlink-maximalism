@@ -139,7 +139,7 @@ class TagsHyperlinkMaximalismPluginSettingTab extends PluginSettingTab {
     .setName('Maximum for Color Scale')
     .setDesc(`The amount of instances of a string such that this quantity or more will be highlighted red.`)
     .addText(text => text
-      .setPlaceholder('10')
+      .setPlaceholder(10)
       .setValue(this.plugin.settings.maximumColorScale)
       .onChange(async (value) => {
         this.plugin.settings.maximumColorScale = value;
@@ -173,10 +173,7 @@ export default class TagsHyperlinkMaximalismPlugin extends Plugin {
 
     this.registerEditorExtension(this.editorExtension);
     
-    pluginHelper.onFileMetadataChanged((file) => this.indexer.buildIndex());
-
-    // will re-apply decorations. Not quite right, but re-building the index seems like overkill
-    // pluginHelper.onFileMetadataChanged((file) => this.loadhyperlinkMaximalismExtension()); 
+    pluginHelper.onFileMetadataChanged((file) => this.indexer.buildIndex(true)); 
 
     this.subscribeToEventsAndLoadExtensions(pluginHelper);
     this.addCommand({
