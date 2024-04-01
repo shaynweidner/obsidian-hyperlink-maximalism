@@ -35,6 +35,11 @@ export const showSuggestionsModal = (props: SuggestionsModalProps): void => {
         }
         )
       );
+      menu.addItem(
+        item('pencil', `replace with [[${linkText.split(':')[0]}|${currentPhrase}]]`, () => {
+            onClick1(`[[${linkText.split(':')[0]}|${currentPhrase}]]`);
+        })
+        );
     });
 
     menu.addSeparator();

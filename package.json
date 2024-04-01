@@ -1,6 +1,6 @@
 {
   "name": "obsidian-hyperlink-maximalism",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Graded highlighting of common phrases in obsidian.",
   "main": "src/index.ts",
   "license": "MIT",

@@ -270,7 +270,7 @@ export const hyperlinkMaximalismExtension = (indexer: Indexer) => {
           app: indexer.pluginHelper.plugin.app,
           mouseEvent: e,
           suggestions: suggestionsWithCountsStrings,
-          currentPhrase: indexKeyword,
+          currentPhrase: target.innerText,
           onClick1: (replaceText) => {
             view.dispatch({
               changes: {
